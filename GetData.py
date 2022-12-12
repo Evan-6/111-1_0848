@@ -2,14 +2,13 @@ import requests
 import json
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
-import pandas as pd
 import csv
 
-# data source : https://data.gov.tw/dataset/146920
 time = ["2022/01","2022/02","2022/03","2022/04","2022/05","2022/06","2022/07","2022/08","2022/09","2022/10"]
 if __name__ == '__main__':
 
 #台中#######################################################################################################################
+    # data source : https://data.gov.tw/dataset/146920
     taichung_data_url_list={
         '2022/10':'https://datacenter.taichung.gov.tw/swagger/OpenData/052ba9b8-040b-42be-a3c8-dcc96324cfc8',
         '2022/09':'https://datacenter.taichung.gov.tw/swagger/OpenData/95ac9ad4-4b36-41c9-9937-68a9834c7687',
@@ -61,12 +60,39 @@ if __name__ == '__main__':
     url = "https://covid-19.nchc.org.tw/api/covid19?CK=covid-19@nchc.org.tw&querydata=4051&limited=TWN"
     response = requests.get(url)
     data = json.loads(response.text)
-    print(data)
+    # print(data)
+    url = "https://covid-19.nchc.org.tw/api/covid19?CK=covid-19@nchc.org.tw&querydata=4051&limited=TWN"
+    response = requests.get(url)
+    data = json.loads(response.text)
+    month = '01'
+    numsum = 0
+    plot_numlist=[]
+    for i in data:
+        if month=='11':
+            break
+        data_month = i.get('a04').split('-')[1]
+        data_num = i.get('a06')
+        if month==data_month:
+            numsum += int(data_num)
+        else:
+            # print(month , numsum)
+            plot_numlist.append(numsum)
+            month = data_month
+            numsum = 0
+    print(plot_numlist)
 
 
 #繪圖#######################################################################################################################
-    fig, axs = plt.subplots(2)
-    fig.suptitle('')
+    fig, axs = plt.subplots(3)
+
+    
     axs[0].plot(time, taipei_traffic_volume, color=(255/255,100/255,100/255))
+    axs[0].set_title(u'Traffic volume of Taichung MRT')
+
     axs[1].plot(time, taichung_traffic_volume, color=(255/255,100/255,100/255))
+    axs[1].set_title(u'Traffic volume of Taipei MRT')
+
+    axs[2].plot(time, plot_numlist, color=(55/255,100/255,10/255))
+    axs[2].set_title(u'Number of confirmed cases')
+
     plt.show()
