@@ -3,6 +3,7 @@ import json
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 import csv
+import xmltodict
 
 time = ["2022/01","2022/02","2022/03","2022/04","2022/05","2022/06","2022/07","2022/08","2022/09","2022/10"]
 if __name__ == '__main__':
@@ -33,7 +34,8 @@ if __name__ == '__main__':
         for day_data in data:
             total += int(day_data.get("總運量").replace(',',''))
         taichung_traffic_volume.append(total)
-        print(year_month ,'總運量:', total)
+        # print(year_month ,'總運量:', total)
+    print(taichung_traffic_volume)
 
 
 #台北#######################################################################################################################
@@ -52,9 +54,27 @@ if __name__ == '__main__':
                     total+=int(row[0].replace(',',''))
             except:
                 pass
-        print(total)
         taipei_traffic_volume.append(total)
-
+    print(taipei_traffic_volume)
+#台北送醫
+    response = requests.get('https://data.gov.tw/dataset/121979')
+    p = BeautifulSoup(response.text, 'lxml').select("div.download-item a")
+    temp=''
+    taipei_epi=[]
+    for i in range(len(p)-10,len(p)):
+        total=0
+        temp = p[i]['href']
+        result = requests.get(temp).content
+        with open('temp.csv','wb') as csvv:
+            csvv.write(result)
+        with open('temp.csv') as csvv:
+            cr = csv.reader(csvv, dialect=csv.excel_tab,delimiter=',')
+            for row in cr:
+                if row[0]=='總計 ':
+                    taipei_epi.append(int(row[8]))
+    print(taipei_epi)
+    plt.plot(time, taipei_epi, color=(55/255,100/255,10/255))
+    plt.show()
 
 #確診#######################################################################################################################
     url = "https://covid-19.nchc.org.tw/api/covid19?CK=covid-19@nchc.org.tw&querydata=4051&limited=TWN"
@@ -76,17 +96,16 @@ if __name__ == '__main__':
             month = data_month
             total = 0
     print(plot_numlist)
+    
 
-
-#繪圖#######################################################################################################################
+# #繪圖#######################################################################################################################
     fig, axs = plt.subplots(3)
 
-    
     axs[0].plot(time, taipei_traffic_volume, color=(255/255,100/255,100/255))
-    axs[0].set_title(u'Traffic volume of Taichung MRT')
+    axs[0].set_title(u'Traffic volume of Taipei MRT')
 
     axs[1].plot(time, taichung_traffic_volume, color=(255/255,100/255,100/255))
-    axs[1].set_title(u'Traffic volume of Taipei MRT')
+    axs[1].set_title(u'Traffic volume of Taichung MRT')
 
     axs[2].plot(time, plot_numlist, color=(55/255,100/255,10/255))
     axs[2].set_title(u'Number of confirmed cases')
