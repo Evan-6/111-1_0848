@@ -56,7 +56,8 @@ if __name__ == '__main__':
                 pass
         taipei_traffic_volume.append(total)
     print(taipei_traffic_volume)
-#台北送醫
+    
+#台北送醫####################################################################################################################
     response = requests.get('https://data.gov.tw/dataset/121979')
     p = BeautifulSoup(response.text, 'lxml').select("div.download-item a")
     temp=''
@@ -65,16 +66,18 @@ if __name__ == '__main__':
         total=0
         temp = p[i]['href']
         result = requests.get(temp).content
+
         with open('temp.csv','wb') as csvv:
             csvv.write(result)
-        with open('temp.csv') as csvv:
+
+        with open('temp.csv' , 'r') as csvv:
             cr = csv.reader(csvv, dialect=csv.excel_tab,delimiter=',')
             for row in cr:
                 if row[0]=='總計 ':
                     taipei_epi.append(int(row[8]))
     print(taipei_epi)
-    plt.plot(time, taipei_epi, color=(55/255,100/255,10/255))
-    plt.show()
+    # plt.plot(time, taipei_epi, color=(55/255,100/255,10/255))
+    # plt.show()
 
 #確診#######################################################################################################################
     url = "https://covid-19.nchc.org.tw/api/covid19?CK=covid-19@nchc.org.tw&querydata=4051&limited=TWN"
@@ -98,8 +101,8 @@ if __name__ == '__main__':
     print(plot_numlist)
     
 
-# #繪圖#######################################################################################################################
-    fig, axs = plt.subplots(3)
+#繪圖#######################################################################################################################
+    fig, axs = plt.subplots(4)
 
     axs[0].plot(time, taipei_traffic_volume, color=(255/255,100/255,100/255))
     axs[0].set_title(u'Traffic volume of Taipei MRT')
@@ -109,5 +112,8 @@ if __name__ == '__main__':
 
     axs[2].plot(time, plot_numlist, color=(55/255,100/255,10/255))
     axs[2].set_title(u'Number of confirmed cases')
+
+    axs[3].plot(time, taipei_epi, color=(55/255,100/255,10/255))
+    axs[3].set_title(u'Number of emergency medical treatment')
 
     plt.show()
